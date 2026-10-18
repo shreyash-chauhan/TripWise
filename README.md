@@ -1,235 +1,239 @@
 # TripWise — Smart Travel Planner
+
 > **Full-Stack Web Development Recruitment Task**  
-> **AWS Student Builder Group, VIT Chennai**
+> AWS Student Builder Group · VIT Chennai
 
-TripWise is a modern, high-performance, editorial travel-planning web application designed to help travellers discover real world destinations, explore authentic historical and cultural landmarks, and curate personal itineraries that persist across browser refreshes and server restarts.
+TripWise is a travel discovery and itinerary-planning web application. Explore curated destinations, search by city or keyword, filter and sort results, view destination information and geographic references, and save places to a personal itinerary with planned dates and notes.
 
----
-
-## 🌟 Key Highlights & Features
-
-1. **Live External Places Discovery**:
-   - Integrated with **OpenStreetMap (Nominatim)** and the **Wikipedia REST API** for live geocoding, coordinates, and factual place summaries.
-   - Optional integration with **Geoapify Places API** and **OpenTripMap**.
-   - Built-in SQLite cache layer adhering to external API usage policies while delivering sub-millisecond responses.
-2. **Search by Keyword or City**:
-   - Instant search with auto-debounce and quick-suggestion destination chips (*Kyoto, Paris, Rome, Bali, Cairo, Mahabalipuram, San Francisco, Banff*).
-3. **Category Filtering**:
-   - Filter across *Historical & Landmarks*, *Nature & Parks*, *Arts & Culture*, *Food & Dining*, *Coastal & Beaches*, *Architecture*, and *Modern & Urban*.
-4. **Multi-Criterion Sorting**:
-   - Sort by *Recommended & Curated*, *Rating (Highest first)*, *Name (A → Z)*, *Name (Z → A)*, and *Category*.
-5. **Interactive Destination Details Modal**:
-   - High-resolution photography with fallback error handlers.
-   - Factual Wikipedia descriptive extracts and exact latitude/longitude coordinates.
-   - One-click navigation links to **Google Maps** and **OpenStreetMap Registry**.
-   - Direct trip planning: add planned visit date and personal notes.
-6. **Persistent Personal Itinerary**:
-   - Fully backed by an embedded **SQLite** database (`node:sqlite`).
-   - Add/remove destinations with instant optimistic UI updates and toast feedback.
-   - Custom trip planning: schedule visit dates and write personal trip notes.
-   - Inline notes editor directly within the "My Trip" view.
-7. **Itinerary Export & Print**:
-   - Export your itinerary to clean GitHub-Flavored Markdown, download as JSON, or print directly.
-8. **Responsive Editorial Design**:
-   - Custom editorial aesthetic: deep forest-green accents (`#0F382C`), warm off-white background (`#FAF8F5`), amber highlights (`#D97706`), and crisp typography.
-   - Polished mobile navigation, loading skeletons with pulse shimmer, empty state with filters reset, and recoverable error state.
+**Live demo:** https://tripwise-vm4w.onrender.com  
+**Source code:** https://github.com/shreyash-chauhan/TripWise  
+**API health:** https://tripwise-vm4w.onrender.com/api/health
 
 ---
 
-## 🛠️ Technology Stack
+## Contents
 
-| Layer | Technology | Rationale |
-|---|---|---|
-| **Frontend** | React 19 + Vite 8 + TypeScript | Blazing fast HMR, strict type safety, modern modular architecture |
-| **Styling** | Tailwind CSS v4 | Clean utility classes, zero runtime overhead, custom design tokens |
-| **Icons** | Lucide React | Modern, accessible travel and UI iconography |
-| **Backend** | Node.js (v24) + Express | Lightweight, reliable RESTful API server with TypeScript execution |
-| **Database** | SQLite (`node:sqlite`) | High-performance embedded SQL database with WAL mode and zero binary dependencies |
-| **External APIs** | OpenStreetMap Nominatim + Wikipedia REST API | Live global geocoding, authentic descriptions, real coordinates, zero fabricated data |
+- [Features](#features)
+- [Technology stack](#technology-stack)
+- [Architecture](#architecture)
+- [Getting started](#getting-started)
+- [Available scripts](#available-scripts)
+- [API reference](#api-reference)
+- [Database](#database)
+- [Deployment](#deployment)
+- [Project requirements](#project-requirements)
+- [Credits and license](#credits-and-license)
 
----
+## Features
 
-## 🚀 Quick Start Guide
+### Discover destinations
+- Browse a curated collection of destinations with images, locations, categories, descriptions, and ratings.
+- Search by destination name, city, landmark, or keyword.
+- Use quick-search suggestions for destinations such as Kyoto, Paris, Rome, Bali, Cairo, Mahabalipuram, San Francisco, and Banff.
+- Filter by category:
+  - Historical & Landmarks
+  - Nature & Parks
+  - Arts & Culture
+  - Food & Dining
+  - Coastal & Beaches
+  - Architecture
+  - Modern & Urban
+- Sort results by recommended order, rating, name (ascending or descending), or category.
+
+### Explore destination details
+- View a destination's description, location, and geographic coordinates.
+- Open location references in Google Maps and OpenStreetMap.
+- Follow Wikipedia references for additional information.
+- Use fallback imagery and recoverable UI states when content is unavailable.
+
+### Build a personal itinerary
+- Add destinations to **My Trip** and remove them when plans change.
+- Add an optional planned visit date and personal notes.
+- Edit itinerary details and clear the itinerary.
+- Export or print the itinerary.
+- Receive visible feedback for actions, and use loading, empty, and error states to understand what the app is doing.
+
+### Responsive interface
+- Responsive layouts for desktop and mobile.
+- Editorial visual style with forest-green accents, a warm off-white background, and clear typography.
+- Mobile-friendly navigation, destination cards, and itinerary controls.
+
+## Technology stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React 19, Vite 8, TypeScript |
+| Styling | Tailwind CSS v4 |
+| Icons | Lucide React |
+| Backend | Node.js, Express, TypeScript |
+| Database | SQLite using Node's built-in `node:sqlite` |
+| External data | OpenStreetMap Nominatim and Wikipedia REST API |
+| Deployment | Render single web service |
+
+## Architecture
+
+TripWise is organized as a frontend and backend in one repository:
+
+- **Frontend** — React application built with Vite. It calls the backend through `/api`.
+- **Backend** — Express REST API. In production, it also serves the built frontend assets and the single-page application fallback.
+- **Database** — SQLite stores itinerary records and related local data.
+- **External sources** — OpenStreetMap Nominatim supports place/geographic lookup; Wikipedia provides destination summaries and reference information.
+
+The production deployment uses one Render web service for both the frontend and API.
+
+## Getting started
 
 ### Prerequisites
-- **Node.js** (v20+ recommended, v22.5+ or v24 built-in SQLite supported)
-- **npm** (v10+)
 
-### 1. Installation
-Clone the repository and install all dependencies:
+- Node.js 24 recommended (Node.js 22.5 or later is needed for the built-in SQLite module used by this project).
+- npm.
+
+### 1. Clone the repository
 
 ```bash
-# In project root (d:\AntiGravity)
+git clone https://github.com/shreyash-chauhan/TripWise.git
+cd TripWise
+```
+
+### 2. Install dependencies
+
+From the repository root:
+
+```bash
 npm run install:all
 ```
 
-*(Alternatively, run `npm install` inside the root, `backend/`, and `frontend/` folders).*
-
-### 2. Running in Development Mode
-Start both the Backend API (`http://localhost:5000`) and Frontend (`http://localhost:5173`) concurrently:
+### 3. Run in development
 
 ```bash
 npm run dev
 ```
 
-Open your browser at **`http://localhost:5173`**.
+The development frontend is available at `http://localhost:5173`. The backend runs at `http://localhost:5000` by default.
 
-### 3. Automated Test Suites
-TripWise includes two independent automated test suites:
-
-```bash
-# Run both test suites
-npm test
-
-# 1. Search Relevance & Quality Regression Suite (33 deterministic tests)
-npm run test:relevance
-
-# 2. End-to-End Backend Endpoint & Database Persistence Suite
-npm run test:backend
-```
-
-The test suites verify:
-- Relevance scoring and disambiguation for queries like *Rome*, *Rome Italy*, *Chennai*, *Paris*, *Colosseum*, and *Chai Chee*.
-- Multiword destination queries and deliberate nonexistent destination handling.
-- Rejection of Wikipedia disambiguation pages and substring matches.
-- Neutral fallback images ensuring no iconic monument hijacking.
-- All 8 category definitions including *Modern & Urban*.
-- Full itinerary CRUD lifecycle (Add, Get, Update, Duplicate prevention, Delete) and zero database pollution.
-
-### 4. Production Build
-Build both frontend and backend bundles:
+### 4. Build for production
 
 ```bash
 npm run build
 ```
 
----
+### 5. Run tests
 
-## ☁️ Deployment Guide (Single Render Web Service)
+Run both test suites:
 
-TripWise is configured to run as a **single, unified service on Render**: Express serves the production React frontend static assets while handling all `/api` endpoints with zero routing conflicts.
-
-### Render Web Service Settings
-
-| Configuration Field | Recommended Setting | Note |
-|---|---|---|
-| **Environment** | `Node` | Node.js v22.5+ or v24 |
-| **Root Directory** | `.` (Leave blank / repo root) | Full monorepo |
-| **Build Command** | `npm run install:all && npm run build` | Installs deps and builds both frontend & backend |
-| **Start Command** | `npm start` | Runs `node --experimental-sqlite dist/index.js` |
-| **Auto-Deploy** | `Yes` (Triggered on push to `main`) | Deploys on git commit |
-
-### Environment Variables
-
-| Variable | Value / Purpose |
-|---|---|
-| `NODE_ENV` | `production` |
-| `PORT` | Set automatically by Render (defaults to `5000` locally) |
-| `DATABASE_PATH` | `/var/data/tripwise.db` (when using a Persistent Disk) |
-
-### ⚠️ Render Free Tier vs Persistent Disk Notice
-- **Render Free Tier**: Render's free tier runs on an ephemeral filesystem without disk persistence. User-added itinerary items will persist while the instance is active, but will reset upon inactivity spin-down or new redeploys.
-- **Render Paid Persistent Disk**: To retain user itinerary data permanently across redeployments and restarts, attach a **Persistent Disk** on Render mounted at `/var/data` (e.g., 1 GB) and set environment variable `DATABASE_PATH=/var/data/tripwise.db`. TripWise automatically verifies and creates the `/var/data` directory on startup.
-
----
-
-## 📡 API Specification
-
-All backend endpoints are prefixed with `/api`.
-
-### Places Endpoints
-- `GET /api/places`
-  - Query parameters:
-    - `query`: Search string (e.g. `Kyoto`, `Colosseum`, `Marina Beach`)
-    - `category`: Filter by category (e.g. `Historical & Landmarks`, `Nature & Parks`)
-    - `sort`: `recommended` | `rating-desc` | `name-asc` | `name-desc` | `category`
-- `GET /api/places/categories`
-  - Returns list of categories and current destination counts.
-- `GET /api/places/:id`
-  - Returns complete details for a single place.
-
-### Itinerary Endpoints (SQLite Persistence)
-- `GET /api/itinerary`
-  - Retrieves all saved destinations ordered by creation time.
-- `POST /api/itinerary`
-  - Saves a destination to the itinerary.
-  - Body: `{ placeId, name, location, category, imageUrl, description, lat, lng, notes, visitDate }`
-- `PATCH /api/itinerary/:id`
-  - Updates personal trip notes or planned visit date.
-  - Body: `{ notes, visitDate }`
-- `DELETE /api/itinerary/:id`
-  - Removes a destination by numeric itinerary ID.
-- `DELETE /api/itinerary/place/:placeId`
-  - Removes a destination by its unique place ID.
-- `DELETE /api/itinerary`
-  - Clears all saved destinations.
-
-### System & Health
-- `GET /api/health`
-  - Returns system status, DB connection health, and total saved places count.
-
----
-
-## 🏛️ Database Architecture
-
-TripWise utilizes SQLite with WAL (`Write-Ahead Logging`) mode for durability and speed:
-
-```sql
-CREATE TABLE IF NOT EXISTS itinerary (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  place_id TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  location TEXT NOT NULL,
-  category TEXT NOT NULL,
-  image_url TEXT NOT NULL,
-  description TEXT,
-  lat REAL,
-  lng REAL,
-  notes TEXT DEFAULT '',
-  visit_date TEXT DEFAULT '',
-  created_at TEXT DEFAULT (datetime('now')),
-  updated_at TEXT DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS api_cache (
-  cache_key TEXT PRIMARY KEY,
-  data TEXT NOT NULL,
-  expires_at INTEGER NOT NULL
-);
+```bash
+npm test
 ```
 
----
+Run an individual suite:
 
-## 🎨 Design System
+```bash
+npm run test:relevance
+npm run test:backend
+```
 
-- **Primary Forest Teal**: `#0F382C` — sophisticated and grounded.
-- **Warm Terracotta/Amber**: `#D97706` — warm accent highlights.
-- **Editorial Canvas Background**: `#FAF8F5` — soft, easy on the eyes.
-- **Charcoal Typography**: `#1F2937` — high contrast, accessible reading.
-- **Typography**: Editorial Serif headers (`Playfair Display` / System Serif) with clean geometric sans-serif body (`Plus Jakarta Sans`).
+The relevance tests cover search quality, disambiguation, category definitions, and handling of missing results. The backend tests cover API behavior and itinerary/database operations.
 
----
+## Available scripts
 
-## 📋 Evaluation Checklist & Verification
+Run these commands from the repository root:
 
-| Requirement | Implementation Details | Status |
+| Command | Purpose |
+|---|---|
+| `npm run install:all` | Install root, backend, and frontend dependencies |
+| `npm run dev` | Start frontend and backend in development |
+| `npm run build` | Build the frontend and backend for production |
+| `npm start` | Start the production server |
+| `npm test` | Run the test suites |
+| `npm run test:relevance` | Run search relevance regression tests |
+| `npm run test:backend` | Run backend and persistence tests |
+
+## API reference
+
+All API routes are prefixed with `/api`.
+
+### Places
+
+| Method | Endpoint | Purpose |
 |---|---|---|
-| **1. Discover destinations with real external API** | Integrated with OpenStreetMap Nominatim + Wikipedia REST API with live coordinates & summaries | ✅ Verified |
-| **2. Search by name or keyword** | Instant search bar with debouncing and quick-filter pills | ✅ Verified |
-| **3. Filter by category** | Category pills bar (Historical, Nature, Arts, Food, Coastal, Architecture, Modern & Urban) | ✅ Verified |
-| **4. Sort by meaningful criteria** | Recommended, Rating (high to low), Name (A-Z), Name (Z-A), Category | ✅ Verified |
-| **5. Destination details view** | Modal with photography, factual description, Google Maps & OSM links, coordinates | ✅ Verified |
-| **6. Add destinations to itinerary** | One-click save toggle with instant toast feedback and optimistic state | ✅ Verified |
-| **7. View and remove saved destinations** | "My Trip" view with removal, clear all, and inline date/notes editor | ✅ Verified |
-| **8. Data persistence across restarts** | SQLite database (`backend/data/tripwise.db`) preserves all user data across restarts | ✅ Verified |
-| **9. Loading, empty, and error feedback** | Pulsing skeleton cards, empty search state with reset CTA, recoverable error state | ✅ Verified |
-| **10. Responsive desktop and mobile** | Fully responsive flexbox/grid layout, mobile bottom bar & navigation | ✅ Verified |
+| `GET` | `/api/places` | List destinations; supports search, category filtering, and sorting |
+| `GET` | `/api/places/categories` | Return available categories and counts |
+| `GET` | `/api/places/:id` | Retrieve details for a destination |
 
----
+`GET /api/places` supports these query parameters:
 
-## 👨‍💻 Recruitment Submission Details
+| Parameter | Purpose |
+|---|---|
+| `query` | Search by name, city, landmark, or keyword |
+| `category` | Filter by category |
+| `sort` | `recommended`, `rating-desc`, `name-asc`, `name-desc`, or `category` |
 
-- **Candidate Submission**: Web Development Recruitment Task
-- **Organization**: AWS Student Builder Group, VIT Chennai
-- **Project Name**: TripWise — Smart Travel Planner
-- **License**: MIT
+### Itinerary
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/itinerary` | Retrieve saved itinerary entries |
+| `POST` | `/api/itinerary` | Add a destination to the itinerary |
+| `PATCH` | `/api/itinerary/:id` | Update itinerary notes or visit date |
+| `DELETE` | `/api/itinerary/:id` | Remove an entry by itinerary ID |
+| `DELETE` | `/api/itinerary/place/:placeId` | Remove an entry by destination ID |
+| `DELETE` | `/api/itinerary` | Clear all itinerary entries |
+
+The `POST /api/itinerary` request body accepts destination information such as `placeId`, `name`, `location`, `category`, `imageUrl`, `description`, `lat`, `lng`, `notes`, and `visitDate`.
+
+The `PATCH /api/itinerary/:id` request body can include `notes` and `visitDate`.
+
+### Health
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | Report API status, database connectivity, environment, and saved itinerary count |
+
+Try the deployed health endpoint: https://tripwise-vm4w.onrender.com/api/health
+
+## Database
+
+TripWise uses SQLite through Node's built-in `node:sqlite` module. The database layer supports a configurable `DATABASE_PATH`; otherwise, it uses the project's default database location.
+
+The itinerary data model includes fields for the destination ID, name, location, category, image URL, description, coordinates, notes, visit date, and created/updated timestamps. A local API cache table is also used where applicable.
+
+### Important: persistence on Render
+
+The live demo currently runs on Render. **The local SQLite file is not guaranteed to survive instance replacement, redeployment, or free-service spin-down when stored on an ephemeral filesystem.** For durable production persistence, attach a Render Persistent Disk and set `DATABASE_PATH` to a path on that mounted disk (for example, `/var/data/tripwise.db` when the disk is mounted at `/var/data`).
+
+## Deployment
+
+TripWise is configured for a single Render web service that builds the frontend and backend, then lets Express serve the frontend and API.
+
+Suggested Render settings:
+
+| Setting | Value |
+|---|---|
+| Environment | Node |
+| Root directory | Repository root |
+| Build command | `npm run install:all && npm run build` |
+| Start command | `npm start` |
+| `NODE_ENV` | `production` |
+
+Render supplies the `PORT` environment variable. For persistent SQLite storage, configure `DATABASE_PATH` to a location on a mounted persistent disk.
+
+## Project requirements
+
+The project was built to demonstrate:
+
+- Integration with external place and information APIs.
+- Search, filtering, and sorting.
+- Destination detail views.
+- Itinerary create, read, update, and delete operations.
+- Database-backed itinerary storage.
+- Loading, empty, and error states.
+- Responsive desktop and mobile UI.
+- A public source repository and live deployment.
+
+## Credits and license
+
+- Geographic/place data: [OpenStreetMap](https://www.openstreetmap.org/) and [Nominatim](https://nominatim.org/).
+- Destination summaries and references: [Wikipedia](https://www.wikipedia.org/).
+- Map links: [Google Maps](https://maps.google.com/) and OpenStreetMap.
+
+**License:** MIT, as intended for this project. If you distribute the repository, make sure the repository includes the corresponding `LICENSE` file.
