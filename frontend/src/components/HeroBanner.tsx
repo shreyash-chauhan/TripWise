@@ -39,6 +39,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   const handleClear = () => {
     setLocalInput('');
     onSearchChange('');
+    onSearchSubmit('');
   };
 
   return (

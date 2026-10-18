@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { CategoryFilterBar } from './components/CategoryFilterBar';
@@ -41,6 +41,9 @@ export const App: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
 
+  // Active request tracking to prevent older asynchronous responses from overwriting newer ones
+  const activeRequestIdRef = useRef<number>(0);
+
   // Debounce search query to prevent excessive queries while typing
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -73,6 +76,7 @@ export const App: React.FC = () => {
 
   // Fetch Places whenever query, category, or sort changes
   const loadPlaces = useCallback(async () => {
+    const requestId = ++activeRequestIdRef.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -81,14 +85,25 @@ export const App: React.FC = () => {
         category: selectedCategory,
         sort: currentSort,
       });
+
+      // Discard stale out-of-order response if user initiated another request
+      if (requestId !== activeRequestIdRef.current) {
+        return;
+      }
+
       setPlaces(res.places);
       setTotalResults(res.total);
     } catch (err: any) {
+      if (requestId !== activeRequestIdRef.current) {
+        return;
+      }
       console.error('Failed to load places:', err);
       setError(err.message || 'Unable to connect to the destinations service.');
       showToast('Failed to load destinations. Please check your connection.', 'error');
     } finally {
-      setIsLoading(false);
+      if (requestId === activeRequestIdRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [debouncedQuery, selectedCategory, currentSort, showToast]);
 

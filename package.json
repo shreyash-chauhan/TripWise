@@ -11,6 +11,8 @@
     "build:backend": "npm run build --prefix backend",
     "build:frontend": "npm run build --prefix frontend",
     "start": "npm run start --prefix backend",
+    "test": "npm run test:relevance && npm run test:backend",
+    "test:relevance": "npx tsx backend/src/tests/relevanceRegression.test.ts",
     "test:backend": "npx tsx backend/src/testServer.ts"
   },
   "devDependencies": {
