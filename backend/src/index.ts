@@ -1,11 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { initDatabase, db } from './db/database.js';
 import placesRoutes from './routes/placesRoutes.js';
 import itineraryRoutes from './routes/itineraryRoutes.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize SQLite database
 initDatabase();
@@ -52,7 +58,20 @@ app.get('/api/health', (_req, res) => {
   }
 });
 
-// 404 handler
+// Serve built static frontend in production (Single Render Web Service deployment)
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    // Preserve API 404s - do not swallow /api routes with SPA index.html
+    if (req.originalUrl.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
+
+// 404 handler for unmatched API routes
 app.use((_req, res) => {
   res.status(404).json({
     success: false,

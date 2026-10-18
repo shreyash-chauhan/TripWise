@@ -122,7 +122,7 @@ export function calculateRelevanceScore(query: string, place: CandidatePlace): n
     hasValidMatch = true;
     isDirectNameMatch = true;
   }
-  // 4. Multiword search: all query tokens present in place name
+  // 4. Multiword search: all query tokens present in place name or geographic context
   else {
     const queryTokens = normQuery.split(/\s+/).filter(Boolean);
     if (queryTokens.length > 1) {
@@ -131,6 +131,30 @@ export function calculateRelevanceScore(query: string, place: CandidatePlace): n
         score += 500;
         hasValidMatch = true;
         isDirectNameMatch = true;
+      } else {
+        // Multiword geographic match (e.g. "Rome Italy", "Paris France", "Kyoto Japan")
+        const fullPlaceText = normalizeText(`${place.name} ${cleanName} ${place.nameEn || ''} ${place.city || ''} ${place.location || ''} ${place.country || ''}`);
+        const allTokensPresent = queryTokens.every(t => {
+          if (containsWholeWord(fullPlaceText, t) || startsWithWord(fullPlaceText, t)) return true;
+          // Handle multilingual equivalents like "rome" matching Italian "roma"
+          if (areEquivalentNames(t, 'rome') && containsWholeWord(fullPlaceText, 'roma')) return true;
+          return false;
+        });
+
+        if (allTokensPresent) {
+          // If primary name matches the first token (e.g. "Rome" in "Rome Italy"), strong score
+          if (
+            startsWithWord(cleanName, queryTokens[0]) ||
+            containsWholeWord(cleanName, queryTokens[0]) ||
+            areEquivalentNames(cleanName, queryTokens[0])
+          ) {
+            score += 850;
+            isDirectNameMatch = true;
+          } else {
+            score += 450;
+          }
+          hasValidMatch = true;
+        }
       }
     }
   }

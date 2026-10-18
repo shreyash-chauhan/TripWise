@@ -6,13 +6,17 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Data directory
-const dataDir = path.resolve(__dirname, '../../data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+// Support configurable DATABASE_PATH (e.g., /var/data/tripwise.db on Render with persistent disk)
+// Falling back to local backend/data/tripwise.db
+const defaultDbPath = path.resolve(__dirname, '../../data/tripwise.db');
+const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : defaultDbPath;
+
+// Ensure target directory exists before opening SQLite database
+const targetDir = path.dirname(dbPath);
+if (!fs.existsSync(targetDir)) {
+  fs.mkdirSync(targetDir, { recursive: true });
 }
 
-const dbPath = path.join(dataDir, 'tripwise.db');
 export const db = new DatabaseSync(dbPath);
 
 // Initialize tables

@@ -313,7 +313,7 @@ export const FEATURED_DESTINATIONS: Place[] = [
     location: 'Dubai, United Arab Emirates',
     country: 'United Arab Emirates',
     city: 'Dubai',
-    category: 'Architecture',
+    category: 'Modern & Urban',
     description: 'The world’s tallest structure rising 828 metres into the sky, surrounded by the Dubai Fountain show and modern skyline architecture.',
     imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80',
     rating: 4.7,

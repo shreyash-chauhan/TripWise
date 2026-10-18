@@ -15,7 +15,7 @@ TripWise is a modern, high-performance, editorial travel-planning web applicatio
 2. **Search by Keyword or City**:
    - Instant search with auto-debounce and quick-suggestion destination chips (*Kyoto, Paris, Rome, Bali, Cairo, Mahabalipuram, San Francisco, Banff*).
 3. **Category Filtering**:
-   - Filter across *Historical & Landmarks*, *Nature & Parks*, *Arts & Culture*, *Food & Dining*, *Coastal & Beaches*, and *Architecture*.
+   - Filter across *Historical & Landmarks*, *Nature & Parks*, *Arts & Culture*, *Food & Dining*, *Coastal & Beaches*, *Architecture*, and *Modern & Urban*.
 4. **Multi-Criterion Sorting**:
    - Sort by *Recommended & Curated*, *Rating (Highest first)*, *Name (A → Z)*, *Name (Z → A)*, and *Category*.
 5. **Interactive Destination Details Modal**:
@@ -60,14 +60,13 @@ Clone the repository and install all dependencies:
 
 ```bash
 # In project root (d:\AntiGravity)
-npm install
-cd backend && npm install
-cd ../frontend && npm install
-cd ..
+npm run install:all
 ```
 
+*(Alternatively, run `npm install` inside the root, `backend/`, and `frontend/` folders).*
+
 ### 2. Running in Development Mode
-Start both the Backend API (`http://localhost:5000`) and Frontend (`http://localhost:5173`) with a single command:
+Start both the Backend API (`http://localhost:5000`) and Frontend (`http://localhost:5173`) concurrently:
 
 ```bash
 npm run dev
@@ -75,12 +74,27 @@ npm run dev
 
 Open your browser at **`http://localhost:5173`**.
 
-### 3. Running Backend Tests
-Execute the end-to-end backend integration test:
+### 3. Automated Test Suites
+TripWise includes two independent automated test suites:
 
 ```bash
+# Run both test suites
+npm test
+
+# 1. Search Relevance & Quality Regression Suite (33 deterministic tests)
+npm run test:relevance
+
+# 2. End-to-End Backend Endpoint & Database Persistence Suite
 npm run test:backend
 ```
+
+The test suites verify:
+- Relevance scoring and disambiguation for queries like *Rome*, *Rome Italy*, *Chennai*, *Paris*, *Colosseum*, and *Chai Chee*.
+- Multiword destination queries and deliberate nonexistent destination handling.
+- Rejection of Wikipedia disambiguation pages and substring matches.
+- Neutral fallback images ensuring no iconic monument hijacking.
+- All 8 category definitions including *Modern & Urban*.
+- Full itinerary CRUD lifecycle (Add, Get, Update, Duplicate prevention, Delete) and zero database pollution.
 
 ### 4. Production Build
 Build both frontend and backend bundles:
@@ -88,6 +102,34 @@ Build both frontend and backend bundles:
 ```bash
 npm run build
 ```
+
+---
+
+## ☁️ Deployment Guide (Single Render Web Service)
+
+TripWise is configured to run as a **single, unified service on Render**: Express serves the production React frontend static assets while handling all `/api` endpoints with zero routing conflicts.
+
+### Render Web Service Settings
+
+| Configuration Field | Recommended Setting | Note |
+|---|---|---|
+| **Environment** | `Node` | Node.js v22.5+ or v24 |
+| **Root Directory** | `.` (Leave blank / repo root) | Full monorepo |
+| **Build Command** | `npm run install:all && npm run build` | Installs deps and builds both frontend & backend |
+| **Start Command** | `npm start` | Runs `node --experimental-sqlite dist/index.js` |
+| **Auto-Deploy** | `Yes` (Triggered on push to `main`) | Deploys on git commit |
+
+### Environment Variables
+
+| Variable | Value / Purpose |
+|---|---|
+| `NODE_ENV` | `production` |
+| `PORT` | Set automatically by Render (defaults to `5000` locally) |
+| `DATABASE_PATH` | `/var/data/tripwise.db` (when using a Persistent Disk) |
+
+### ⚠️ Render Free Tier vs Persistent Disk Notice
+- **Render Free Tier**: Render's free tier runs on an ephemeral filesystem without disk persistence. User-added itinerary items will persist while the instance is active, but will reset upon inactivity spin-down or new redeploys.
+- **Render Paid Persistent Disk**: To retain user itinerary data permanently across redeployments and restarts, attach a **Persistent Disk** on Render mounted at `/var/data` (e.g., 1 GB) and set environment variable `DATABASE_PATH=/var/data/tripwise.db`. TripWise automatically verifies and creates the `/var/data` directory on startup.
 
 ---
 
@@ -174,7 +216,7 @@ CREATE TABLE IF NOT EXISTS api_cache (
 |---|---|---|
 | **1. Discover destinations with real external API** | Integrated with OpenStreetMap Nominatim + Wikipedia REST API with live coordinates & summaries | ✅ Verified |
 | **2. Search by name or keyword** | Instant search bar with debouncing and quick-filter pills | ✅ Verified |
-| **3. Filter by category** | Category pills bar (Historical, Nature, Arts, Food, Coastal, Architecture) | ✅ Verified |
+| **3. Filter by category** | Category pills bar (Historical, Nature, Arts, Food, Coastal, Architecture, Modern & Urban) | ✅ Verified |
 | **4. Sort by meaningful criteria** | Recommended, Rating (high to low), Name (A-Z), Name (Z-A), Category | ✅ Verified |
 | **5. Destination details view** | Modal with photography, factual description, Google Maps & OSM links, coordinates | ✅ Verified |
 | **6. Add destinations to itinerary** | One-click save toggle with instant toast feedback and optimistic state | ✅ Verified |

@@ -8,7 +8,10 @@ export const api = {
     category?: string;
     sort?: SortOption;
   }): Promise<{ places: Place[]; total: number }> {
-    const url = new URL(`${window.location.origin}${API_BASE}/places`);
+    const base = API_BASE.startsWith('http://') || API_BASE.startsWith('https://')
+      ? API_BASE
+      : `${window.location.origin}${API_BASE.startsWith('/') ? API_BASE : `/${API_BASE}`}`;
+    const url = new URL(`${base}/places`);
     if (params.query) url.searchParams.set('query', params.query);
     if (params.category && params.category !== 'All') url.searchParams.set('category', params.category);
     if (params.sort) url.searchParams.set('sort', params.sort);

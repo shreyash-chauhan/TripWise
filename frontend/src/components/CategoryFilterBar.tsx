@@ -7,6 +7,7 @@ import {
   UtensilsCrossed,
   Waves,
   Building2,
+  Compass,
   ArrowUpDown,
   RotateCcw
 } from 'lucide-react';
@@ -31,6 +32,7 @@ const CATEGORY_ICONS: Record<string, React.FC<{ className?: string }>> = {
   'Food & Dining': UtensilsCrossed,
   'Coastal & Beaches': Waves,
   'Architecture': Building2,
+  'Modern & Urban': Compass,
 };
 
 export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
@@ -52,6 +54,7 @@ export const CategoryFilterBar: React.FC<CategoryFilterBarProps> = ({
     { name: 'Food & Dining', count: 0 },
     { name: 'Coastal & Beaches', count: 0 },
     { name: 'Architecture', count: 0 },
+    { name: 'Modern & Urban', count: 0 },
   ];
 
   return (

@@ -1,6 +1,6 @@
 import { calculateRelevanceScore, normalizeText, containsWholeWord, type CandidatePlace } from '../services/rankingService.js';
 import { deduplicatePlaces } from '../services/dedupService.js';
-import { getFallbackImage } from '../services/placesService.js';
+import { getFallbackImage, placesService } from '../services/placesService.js';
 import type { Place } from '../types/index.js';
 
 let passed = 0;
@@ -181,7 +181,7 @@ console.log('\nTest Suite 3: Landmark Discoverability');
 }
 
 // -------------------------------------------------------------
-// TEST 4: Query 'Chai Chee' preserves legitimate multiword destinations
+// TEST 4: Multiword Destination Searches ("Chai Chee", "Rome Italy")
 // -------------------------------------------------------------
 console.log('\nTest Suite 4: Multiword Destination Search');
 {
@@ -198,6 +198,39 @@ console.log('\nTest Suite 4: Multiword Destination Search');
 
   const score = calculateRelevanceScore(query, chaiChee);
   assert(score >= 1000, `Legitimate multiword destination Chai Chee is preserved with score ${score}`);
+
+  // Test "Rome Italy" ranks Rome in Italy high and leaves out Rome, Georgia
+  const queryRomeItaly = 'Rome Italy';
+  const romeInItaly: CandidatePlace = {
+    id: 'osm-relation-rome-italy',
+    name: 'Rome',
+    city: 'Rome',
+    country: 'Italy',
+    location: 'Roma Capitale, Lazio, Italia',
+    category: 'Modern & Urban',
+    importance: 0.86,
+    isCapital: true
+  };
+
+  const romeInGeorgia: CandidatePlace = {
+    id: 'osm-relation-rome-ga',
+    name: 'Rome',
+    city: 'Rome',
+    country: 'United States',
+    location: 'Floyd County, Georgia, United States',
+    category: 'Modern & Urban',
+    importance: 0.53
+  };
+
+  const scoreRomeInItaly = calculateRelevanceScore(queryRomeItaly, romeInItaly);
+  const scoreRomeInGA = calculateRelevanceScore(queryRomeItaly, romeInGeorgia);
+
+  assert(scoreRomeInItaly > 1000, `Multiword query "Rome Italy" ranks Rome, Italy highly (got ${scoreRomeInItaly})`);
+  assert(scoreRomeInGA === 0, `Multiword query "Rome Italy" completely rejects Rome, Georgia (got ${scoreRomeInGA})`);
+
+  // Deliberately nonexistent destination
+  const scoreNonexistent = calculateRelevanceScore('xyznonexistentdestination999', romeInItaly);
+  assert(scoreNonexistent === 0, `Deliberately nonexistent search query returns score 0 (got ${scoreNonexistent})`);
 }
 
 // -------------------------------------------------------------
@@ -337,6 +370,27 @@ console.log('\nTest Suite 8: Async Out-of-Order Request Guard');
   }
 
   assert(finalDisplayedState === 'Chennai Results', `Stale response was ignored; displayed state is "${finalDisplayedState}"`);
+}
+
+// -------------------------------------------------------------
+// TEST 9: Category Definitions & Modern & Urban Support
+// -------------------------------------------------------------
+console.log('\nTest Suite 9: Category Definitions & "Modern & Urban" Support');
+{
+  const categories = placesService.getCategories();
+  const catNames = categories.map(c => c.name);
+
+  assert(catNames.includes('All'), 'Category "All" is present');
+  assert(catNames.includes('Historical & Landmarks'), 'Category "Historical & Landmarks" is present');
+  assert(catNames.includes('Nature & Parks'), 'Category "Nature & Parks" is present');
+  assert(catNames.includes('Arts & Culture'), 'Category "Arts & Culture" is present');
+  assert(catNames.includes('Food & Dining'), 'Category "Food & Dining" is present');
+  assert(catNames.includes('Coastal & Beaches'), 'Category "Coastal & Beaches" is present');
+  assert(catNames.includes('Architecture'), 'Category "Architecture" is present');
+  assert(catNames.includes('Modern & Urban'), 'Category "Modern & Urban" is present');
+
+  const modernUrban = categories.find(c => c.name === 'Modern & Urban');
+  assert((modernUrban?.count ?? 0) >= 1, `Modern & Urban has at least 1 curated destination (got ${modernUrban?.count})`);
 }
 
 // -------------------------------------------------------------

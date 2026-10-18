@@ -7,7 +7,7 @@ import { deduplicatePlaces } from './dedupService.js';
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 // Helper to check cache
-function getFromCache(key: string): Place[] | null {
+function getFromCache(key: string): any | null {
   try {
     const stmt = db.prepare('SELECT data, expires_at FROM api_cache WHERE cache_key = ?');
     const row = stmt.get(key) as { data: string; expires_at: number } | undefined;
@@ -187,7 +187,7 @@ async function fetchWikipediaSummary(
  */
 async function searchOsmPlaces(query: string): Promise<Place[]> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&extratags=1&namedetails=1&limit=15`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&extratags=1&namedetails=1&limit=10`;
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'TripWise/1.0 (travel-planner-app; recruitment-task)'
@@ -278,15 +278,29 @@ async function searchOsmPlaces(query: string): Promise<Place[]> {
 export const placesService = {
   // Get all categories
   getCategories(): { name: string; count: number }[] {
-    const categories: Record<string, number> = {
+    const allCategories: PlaceCategory[] = [
+      'Historical & Landmarks',
+      'Nature & Parks',
+      'Arts & Culture',
+      'Food & Dining',
+      'Coastal & Beaches',
+      'Architecture',
+      'Modern & Urban'
+    ];
+
+    const counts: Record<string, number> = {
       'All': FEATURED_DESTINATIONS.length
     };
 
+    for (const cat of allCategories) {
+      counts[cat] = 0;
+    }
+
     FEATURED_DESTINATIONS.forEach(place => {
-      categories[place.category] = (categories[place.category] || 0) + 1;
+      counts[place.category] = (counts[place.category] || 0) + 1;
     });
 
-    return Object.entries(categories).map(([name, count]) => ({ name, count }));
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
   },
 
   // Main search & discovery endpoint
@@ -357,6 +371,10 @@ export const placesService = {
         // Cache results if we found any
         if (results.length > 0) {
           writeToCache(cacheKey, results);
+          // Also cache individual discovered places so getById can retrieve them instantly
+          results.forEach(place => {
+            writeToCache(`place:${place.id}`, place);
+          });
         }
       }
     } else {
@@ -379,7 +397,11 @@ export const placesService = {
           results.sort((a, b) => b.name.localeCompare(a.name));
           break;
         case 'rating-desc':
-          results.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+          results.sort((a, b) => {
+            const diff = (b.rating ?? 0) - (a.rating ?? 0);
+            if (diff !== 0) return diff;
+            return a.name.localeCompare(b.name);
+          });
           break;
         case 'category':
           results.sort((a, b) => a.category.localeCompare(b.category));
@@ -402,10 +424,13 @@ export const placesService = {
     const featured = FEATURED_DESTINATIONS.find(p => p.id === id);
     if (featured) return featured;
 
-    // 2. Check cache
+    // 2. Check cache (handles both single place object and single-element array)
     const cacheKey = `place:${id}`;
     const cached = getFromCache(cacheKey);
-    if (cached && Array.isArray(cached) && cached[0]) return cached[0];
+    if (cached) {
+      if (Array.isArray(cached) && cached[0]) return cached[0];
+      if (!Array.isArray(cached) && (cached as Place).id) return cached as Place;
+    }
 
     // 3. If OSM ID, fetch details
     if (id.startsWith('osm-')) {
