@@ -22,7 +22,8 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 
-# SQLite Database (except directory structure if needed)
+# SQLite Database files (user data - do not commit)
+backend/data/tripwise.db
 backend/data/*.db-shm
 backend/data/*.db-wal
 
